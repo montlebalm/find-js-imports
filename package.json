@@ -1,0 +1,20 @@
+{
+  "name": "find-js-imports",
+  "version": "1.0.0",
+  "description": "Find module imports and exports in an ES6 odebase",
+  "main": "find-js-imports.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "glob": "^7.1.1"
+  },
+  "scripts": {
+    "build": "npm install"
+  },
+  "bin": {
+    "find-js-imports": "find-js-imports.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

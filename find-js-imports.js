@@ -8,7 +8,7 @@ const args = process.argv.slice(2);
 const [ moduleName, query ] = args;
 
 // https://gist.github.com/manekinekko/7e58a17bc62a9be47172
-const IMPORT_RX = /import (?:["'\s]*([\w*{}\n, ]+) from\s*)?["'\s]*([@\w\/_-]+)["'\s]*;?/g;
+const IMPORT_RX = /import (?:["'\s]*([\w*{}\n, ]+) from\s*)?["'\s]*([.@\w\/_-]+)["'\s]*;?/g;
 
 const globOptions = {
   ignore: ['node_modules/**/*.*'],
@@ -44,16 +44,21 @@ glob('**/*.?(js|ts|jsx)', globOptions, (err, paths) => {
 function getImports(contents) {
   const matches = [];
   contents.replace(IMPORT_RX, (match, argString, name) => {
-    matches.push({
-      name,
-      args: splitImportedArgs(argString),
-    });
+    const args = splitImportedArgs(argString);
+    if (!args) return;
+    matches.push({ name, args });
   });
   return matches;
 }
 
-function splitImportedArgs(code) {
-  const args = code
+function splitImportedArgs(argString) {
+  /*
+   * This can happen when importing css
+   * e.g., import 'style.css'
+   */
+  if (!argString) return;
+
+  const args = argString
     .replace(/^{\s*/, '')
     .replace(/\s*}$/, '')
     .split(/\s*,\s*/);
@@ -140,6 +145,8 @@ function printOccurrences({ path, occurrences, query, fileQuery, isLastFile }) {
 }
 
 function printFiles(files) {
+  if (!files.length) return;
+
   console.log('');
 
   files.forEach((file, i) => {

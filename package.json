@@ -15,6 +15,6 @@
   "bin": {
     "find-js-imports": "find-js-imports.js"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Chris Montrois <chris@chrismontrois.net>",
+  "license": "MIT"
 }

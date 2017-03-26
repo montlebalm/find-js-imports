@@ -5,7 +5,7 @@ const glob = require('glob');
 const readline = require('readline');
 
 const args = process.argv.slice(2);
-const [ moduleName, query ] = args;
+const [moduleName, query] = args;
 
 // https://gist.github.com/manekinekko/7e58a17bc62a9be47172
 const IMPORT_RX = /import (?:["'\s]*([\w*{}\n, ]+) from\s*)?["'\s]*([.@\w\/_-]+)["'\s]*;?/g;
@@ -18,25 +18,28 @@ glob('**/*.?(js|ts|jsx)', globOptions, (err, paths) => {
   if (err) throw new Error(err);
 
   // Get each file the imports the module
-  const files = paths.reduce((memo, path) => {
-    const data = fs.readFileSync(path, 'utf-8');
+  const files = paths.reduce(
+    (memo, path) => {
+      const data = fs.readFileSync(path, 'utf-8');
 
-    // Get the relevant imports
-    const match = getImports(data).find(info => info.name === moduleName);
-    if (!match) return memo;
+      // Get the relevant imports
+      const match = getImports(data).find(info => info.name === moduleName);
+      if (!match) return memo;
 
-    // Get the alias aware query for this file
-    const fileQuery = match.args[query];
-    if (!fileQuery) return memo;
+      // Get the alias aware query for this file
+      const fileQuery = match.args[query];
+      if (!fileQuery) return memo;
 
-    // Find everywhere the query is used
-    const occurrences = getOccurrencesInFile(data, fileQuery);
-    if (!occurrences.length) return memo;
+      // Find everywhere the query is used
+      const occurrences = getOccurrencesInFile(data, fileQuery);
+      if (!occurrences.length) return memo;
 
-    memo.push({ path, occurrences, query, fileQuery });
+      memo.push({ path, occurrences, query, fileQuery });
 
-    return memo;
-  }, []);
+      return memo;
+    },
+    []
+  );
 
   printFiles(files);
 });
@@ -63,12 +66,15 @@ function splitImportedArgs(argString) {
     .replace(/\s*}$/, '')
     .split(/\s*,\s*/);
 
-  return args.reduce((memo, arg) => {
-    const parts = arg.split(/\s+as\s+/);
-    const [ name, alias ] = parts;
-    memo[name] = alias || name;
-    return memo;
-  }, {});
+  return args.reduce(
+    (memo, arg) => {
+      const parts = arg.split(/\s+as\s+/);
+      const [name, alias] = parts;
+      memo[name] = alias || name;
+      return memo;
+    },
+    {}
+  );
 }
 
 function containsImport(imports, name) {
@@ -78,10 +84,13 @@ function containsImport(imports, name) {
 function getOccurrencesInFile(contents, query) {
   const lines = contents.split(/\n/);
 
-  return lines.reduce((memo, line, i) => {
-    if (line.includes(query)) memo.push({ i, line });
-    return memo;
-  }, []);
+  return lines.reduce(
+    (memo, line, i) => {
+      if (line.includes(query)) memo.push({ i, line });
+      return memo;
+    },
+    []
+  );
 }
 
 function rightPad(num, width) {
@@ -95,16 +104,19 @@ function rightPad(num, width) {
 function printOccurrences({ path, occurrences, query, fileQuery, isLastFile }) {
   console.log(colorFile(path));
 
-  const highestLineNr = occurrences.reduce((memo, occurrence) => {
-    const { i } = occurrence;
-    return (i > memo) ? i : memo;
-  }, 0);
+  const highestLineNr = occurrences.reduce(
+    (memo, occurrence) => {
+      const { i } = occurrence;
+      return i > memo ? i : memo;
+    },
+    0
+  );
   const digits = highestLineNr.toString().length;
 
   occurrences.forEach(occurrence => {
     const { i, line } = occurrence;
 
-    let formattedLine = line.replace(fileQuery, colorHighlight(fileQuery))
+    let formattedLine = line.replace(fileQuery, colorHighlight(fileQuery));
 
     // Dim the aliased text
     if (query !== fileQuery) {
@@ -126,7 +138,7 @@ function printFiles(files) {
 
   files.forEach((file, i) => {
     const { path, occurrences, query, fileQuery } = file;
-    const isLastFile = (i === files.length);
+    const isLastFile = i === files.length;
     printOccurrences({ path, occurrences, query, fileQuery, isLastFile });
   });
 }

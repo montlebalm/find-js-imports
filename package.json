@@ -10,11 +10,16 @@
     "glob": "^7.1.1"
   },
   "scripts": {
-    "build": "npm install"
+    "build": "npm install",
+    "format": "./node_modules/.bin/prettier --single-quote --trailing-comma es5 --write find-js-imports.js"
   },
   "bin": {
     "find-js-imports": "find-js-imports.js"
   },
   "author": "Chris Montrois <chris@chrismontrois.net>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^0.22.0",
+    "prettier-standard": "^2.0.2"
+  }
 }

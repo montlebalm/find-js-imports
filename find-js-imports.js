@@ -30,7 +30,7 @@ glob('**/*.?(js|ts|jsx)', globOptions, (err, paths) => {
     if (!fileQuery) return memo;
 
     // Find everywhere the query is used
-    const occurrences = getOccurrencesInFile(data, fileQuery, 1);
+    const occurrences = getOccurrencesInFile(data, fileQuery);
     if (!occurrences.length) return memo;
 
     memo.push({ path, occurrences, query, fileQuery });
@@ -72,41 +72,16 @@ function splitImportedArgs(argString) {
 }
 
 function containsImport(imports, name) {
-  return imports.some(data => {
-    return data.name === name;
-  });
+  return imports.some(data => data.name === name);
 }
 
-function getOccurrencesInFile(contents, query, bufferLines) {
-  const allLines = contents.split(/\n/);
+function getOccurrencesInFile(contents, query) {
+  const lines = contents.split(/\n/);
 
-  const matchingLines = allLines.reduce((memo, line, i) => {
-    if (line.includes(query)) {
-      const lines = [];
-
-      // Add preceding lines
-      if (i > 0) {
-        lines.unshift({
-          i: i - 1,
-          line: allLines[i - 1],
-        });
-      }
-
-      // Add the matching line
-      memo.push({ i, line });
-
-      // Add succeeding lines
-      if (i < allLines.length) {
-        lines.push({
-          i: i + 1,
-          line: allLines[i + 1],
-        });
-      }
-    }
+  return lines.reduce((memo, line, i) => {
+    if (line.includes(query)) memo.push({ i, line });
     return memo;
   }, []);
-
-  return matchingLines;
 }
 
 function rightPad(num, width) {

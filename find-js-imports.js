@@ -22,21 +22,10 @@ glob('**/*.?(js|ts|jsx)', globOptions, (err, paths) => {
   // Get each file the imports the module
   const files = paths.reduce(
     (memo, path) => {
-      const data = fs.readFileSync(path, 'utf-8');
+      const contents = fs.readFileSync(path, 'utf-8');
 
-      // Get the relevant imports
-      const match = getImports(data).find(info => info.name === moduleName);
-      if (!match) return memo;
-
-      // Get the alias aware query for this file
-      const fileQuery = match.args[query];
-      if (!fileQuery) return memo;
-
-      // Find everywhere the query is used
-      const occurrences = getOccurrencesInFile(data, fileQuery);
-      if (!occurrences.length) return memo;
-
-      memo.push({ path, occurrences, query, fileQuery });
+      const matches = getFileMatches(contents);
+      if (matches) memo.push(Object.assign({ path }, matches));
 
       return memo;
     },
@@ -46,14 +35,31 @@ glob('**/*.?(js|ts|jsx)', globOptions, (err, paths) => {
   printFiles(files);
 });
 
+function getFileMatches(contents) {
+  // Get the relevant imports
+  const imports = getImports(contents);
+  const matchingImport = imports.find(info => info.name === moduleName);
+  if (!matchingImport) return;
+
+  // Get the alias aware query for this file
+  const fileQuery = matchingImport.args[query];
+  if (!fileQuery) return;
+
+  // Find everywhere the query is used
+  const matches = getMatchesInFile(contents, fileQuery);
+  if (!matches.length) return;
+
+  return { matches, query, fileQuery };
+}
+
 function getImports(contents) {
-  const matches = [];
+  const imports = [];
   contents.replace(IMPORT_RX, (match, argString, name) => {
     const args = splitImportedArgs(argString);
     if (!args) return;
-    matches.push({ name, args });
+    imports.push({ name, args });
   });
-  return matches;
+  return imports;
 }
 
 function splitImportedArgs(argString) {
@@ -83,7 +89,7 @@ function containsImport(imports, name) {
   return imports.some(data => data.name === name);
 }
 
-function getOccurrencesInFile(contents, query) {
+function getMatchesInFile(contents, query) {
   const lines = contents.split(/\n/);
 
   return lines.reduce(

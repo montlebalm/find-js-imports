@@ -12,20 +12,15 @@ function rightPad(num, width) {
   return output;
 }
 
-function printOccurrencesInFile({ path, occurrences, query, fileQuery, isLastFile }) {
-  console.log(chalk.green(path));
-
-  const highestLineNr = occurrences.reduce(
-    (memo, occurrence) => {
-      const { i } = occurrence;
-      return i > memo ? i : memo;
-    },
-    0
-  );
+function printFileMatches({ path, matches, query, fileQuery, isLastFile }) {
+  const lineNrs = matches.map(match => match.i);
+  const highestLineNr = Math.max.apply(null, lineNrs);
   const digits = highestLineNr.toString().length;
 
-  occurrences.forEach(occurrence => {
-    const { i, line } = occurrence;
+  console.log(chalk.green(path));
+
+  matches.forEach(match => {
+    const { i, line } = match;
 
     let formattedLine = line.replace(fileQuery, chalk.black.bgYellow(fileQuery));
 
@@ -48,8 +43,8 @@ function printFiles(files) {
   console.log('');
 
   files.forEach((file, i) => {
-    const { path, occurrences, query, fileQuery } = file;
+    const { path, matches, query, fileQuery } = file;
     const isLastFile = i === files.length;
-    printOccurrencesInFile({ path, occurrences, query, fileQuery, isLastFile });
+    printFileMatches({ path, matches, query, fileQuery, isLastFile });
   });
 }

@@ -1,6 +1,6 @@
 {
   "name": "find-js-imports",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Find module imports and exports in an ES6 odebase",
   "main": "find-js-imports.js",
   "directories": {

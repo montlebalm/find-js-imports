@@ -3,7 +3,7 @@ module.exports = {
 };
 
 // https://gist.github.com/manekinekko/7e58a17bc62a9be47172
-const IMPORT_RX = /import (?:["'\s]*([\w*{}\n, ]+) from\s*)?["'\s]*([.@\w\/_-]+)["'\s]*;?/g;
+const IMPORT_RX = /^import (?:["'\s]*([\w*{}\n, ]+) from\s*)?["'\s]*([.@\w\/_-]+)["'\s]*;?/gm;
 
 function getFileMatches(contents, moduleName, query) {
   // Get the relevant imports
